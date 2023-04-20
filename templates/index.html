@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instagram Image Downloader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}" />
+  </head>
+  <body>
+    <h1>Instagram Image Downloader</h1>
+    <form onsubmit="fetchImage(event)">
+      <label for="instagramUrl">Enter Instagram post URL:</label>
+      <input type="text" id="instagramUrl" name="instagramUrl" required />
+      <input type="submit" value="Fetch Image" />
+    </form>
+    <div id="result">
+        <img alt="Instagram Image" id="imageResult" src="" style = "display:none;"/>
+    </div>
+    <a id="downloadBtn" style="display: none;">Download Image</a>
+    <script>
+      async function fetchImage(event) {
+        event.preventDefault();
+
+        const url = document.getElementById("instagramUrl").value;
+        const response = await fetch("/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({ instagramUrl: url }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const imageResult = document.getElementById("imageResult");
+          const downloadBtn = document.getElementById("downloadBtn");
+
+          imageResult.src = data.image_url;
+          downloadBtn.href = data.image_url;
+          downloadBtn.download = data.image_url.split("/").pop();
+          downloadBtn.style.display = "inline";
+          imageResult.style.display = "block"
+        } else {
+          alert("Error fetching the image");
+        }
+      }
+
+    </script>
+  </body>
+</html>
