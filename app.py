@@ -20,21 +20,32 @@ def index():
         driver = webdriver.Chrome(options=chrome_options)
         driver.get(url)
         time.sleep(10)
-        image = driver.find_element(By.CSS_SELECTOR, "img[class*='x5yr21d']").get_attribute('src')
+        
+        # 이미지 다운로드
+        filenames = []
+        while True:
+            image = driver.find_element(By.CSS_SELECTOR, "img[class*='x5yr21d']").get_attribute('src')
+            filename = f"{uuid.uuid4().hex}.jpg"
+            urlretrieve(image, f'static/images/{filename}')
+            filenames.append(filename)
+            
+            try:
+                button = driver.find_element(By.CLASS_NAME, "_afxw")
+                button.click()
+                time.sleep(5)
+            except:
+                break
+                
         driver.close()
 
-        # UUID를 사용하여 고유한 파일 이름 생성
-        filename = f"{uuid.uuid4().hex}.jpg"
-
-        # 이미지를 서버에 다운로드
-        urlretrieve(image, f'static/images/{filename}')
-
-        return jsonify({'image_url': url_for('static', filename=f'images/{filename}')})
+        return jsonify({'image_urls': [url_for('static', filename=f'images/{filename}') for filename in filenames]})
 
     return render_template('index.html')
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
 
 
